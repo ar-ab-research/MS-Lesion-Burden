@@ -1,0 +1,31 @@
+#!/bin/sh
+# two rules, checked before every commit:
+#   1. main only takes merges. work goes on a branch.
+#   2. no data files. see src/mslb/datasafety.py for what counts.
+# turn it on once per clone with: git config core.hooksPath scripts/hooks
+
+root=$(git rev-parse --show-toplevel) || exit 1
+branch=$(git symbolic-ref --quiet --short HEAD)
+
+# the very first commit of a repo and the commit that finishes a merge are let through
+if [ "$branch" = "main" ] && git rev-parse --verify --quiet HEAD >/dev/null \
+    && [ ! -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+    echo "main is merge-only. commit on a branch and merge it in." >&2
+    exit 1
+fi
+
+# the first interpreter that actually runs. on windows a bare `python` can be the
+# store stub, which exits non-zero, so each one is tried rather than just looked up
+py=""
+for c in "$root/.venv/Scripts/python.exe" "$root/.venv/bin/python" python3 python py; do
+    if "$c" -c "import sys" >/dev/null 2>&1; then
+        py=$c
+        break
+    fi
+done
+if [ -z "$py" ]; then
+    echo "no python found, so the data check cannot run. not committing." >&2
+    exit 1
+fi
+
+exec "$py" "$root/src/mslb/datasafety.py" --staged

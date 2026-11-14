@@ -1,0 +1,4 @@
+* text=auto
+# git runs hooks through sh, which chokes on crlf
+scripts/hooks/* text eol=lf
+*.sh text eol=lf

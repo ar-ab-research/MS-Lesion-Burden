@@ -1,0 +1,67 @@
+# Copy this to config.yaml (which git ignores) and edit the paths.
+# Every value below is the default, so a config only needs the lines it changes.
+# Relative paths are relative to this file.
+
+paths:
+  t1_dir: data/t1                 # T1-weighted NIfTI files: <id>.nii.gz or <id>/T1w.nii.gz
+  clinical_csv: data/clinical.csv # see templates/clinical_template.csv
+  fc_csv: data/fc.csv             # see templates/fc_template.csv
+  output_dir: outputs             # outputs/local stays on this machine, outputs/shareable can be sent
+  cache_dir: cache                # downloaded atlas and template
+
+segmentation:
+  device: auto                    # auto | cpu | cuda | mps
+  sw_batch_size: 4                # lower this if the GPU runs out of memory
+  lesion_label: 18                # MindGlide's lesion label
+  min_lesion_mm3: 3.0             # smaller connected components are not counted as lesions
+
+registration:
+  template: MNI152NLin6Asym       # the space the JHU atlas is in
+  speed: fast                     # fast | accurate
+  mask_lesions: true              # keep lesion voxels out of the registration metric
+
+icv:
+  method: affine_scaling          # affine_scaling | external_csv
+  external_csv: null              # columns subject_id, icv_ml. only read when method is external_csv
+
+tracts:
+  atlas: jhu_tracts_maxprob_thr25_1mm
+  # tested exposures. each name is the sum of the atlas labels listed under it
+  primary:
+    ATR:
+      - Anterior thalamic radiation L
+      - Anterior thalamic radiation R
+    SLF:
+      - Superior longitudinal fasciculus L
+      - Superior longitudinal fasciculus R
+  # written to the per-subject table, not tested
+  secondary:
+    ATR_L: [Anterior thalamic radiation L]
+    ATR_R: [Anterior thalamic radiation R]
+    SLF_L: [Superior longitudinal fasciculus L]
+    SLF_R: [Superior longitudinal fasciculus R]
+    SLF_temporal:
+      - Superior longitudinal fasciculus (temporal part) L
+      - Superior longitudinal fasciculus (temporal part) R
+
+stats:
+  volume_scale: normalized        # normalized (adjusted for head size) | raw
+  alpha: 0.05
+  fdr_method: bh                  # Benjamini-Hochberg, across FC outcomes
+  bootstrap_resamples: 2000       # for the confidence intervals
+  seed: 0
+  min_n: 6                        # a test with fewer complete subjects is skipped and reported as skipped
+  fc_require_both_states: true    # FC tests only use subjects who have both the full and the empty value
+
+analyses:
+  q1_total_burden_fc: true        # total lesion burden vs functional connectivity
+  q2_tract_load_fc: true          # tract lesion load vs functional connectivity
+  q3_detrusor_overactivity: true  # lesion burden by detrusor overactivity on urodynamics
+  q4_symptom_severity: true       # lesion burden vs symptom severity
+  q5_treatment_response: false    # lesion burden by treatment response. off until the data allow it
+
+treatment_response:
+  min_nbss_improvement: null      # required when q5 is on: points of NBSS total improvement that count as a response
+
+report:
+  min_cell_n: 3                   # group statistics are withheld for groups smaller than this
