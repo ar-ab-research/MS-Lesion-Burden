@@ -51,6 +51,13 @@ def build_parser() -> argparse.ArgumentParser:
     fake.add_argument("--force", action="store_true",
                       help="overwrite the clinical and FC files named in the config")
 
+    openms = sub.add_parser("validate-openms",
+                            help="compare lesion masks with the Open MS expert masks")
+    _add_config(openms)
+    openms.add_argument("--data-dir", default=None,
+                        help="where the Open MS files go (default: data/openms next to the config)")
+    openms.add_argument("--force", action="store_true", help="segment again even if cached")
+
     check = sub.add_parser("check-data", help="check that no data files are tracked by git")
     check.add_argument("--staged", action="store_true", help="check staged files only")
     return parser
@@ -118,6 +125,20 @@ def _make_fake_data(args) -> int:
     return 0
 
 
+def _validate_openms(args) -> int:
+    from pathlib import Path
+
+    from mslb import validation
+
+    cfg = load(args.config)
+    data_dir = Path(args.data_dir) if args.data_dir else cfg.source.parent / "data" / "openms"
+    summary = validation.validate_openms(cfg, data_dir, force=args.force)
+    dice, vol = summary["dice"], summary["volume"]
+    print(f"dice      mean {dice['mean']:.3f}  sd {dice['sd']:.3f}  median {dice['median']:.3f}")
+    print(f"volume    pearson r {vol['pearson_r']:.3f}  spearman rho {vol['spearman_rho']:.3f}")
+    return 0
+
+
 def _check_data(args) -> int:
     return datasafety.run(staged=args.staged)
 
@@ -126,6 +147,7 @@ COMMANDS = {
     "run": _run,
     "show-config": _show_config,
     "make-fake-data": _make_fake_data,
+    "validate-openms": _validate_openms,
     "check-data": _check_data,
 }
 
