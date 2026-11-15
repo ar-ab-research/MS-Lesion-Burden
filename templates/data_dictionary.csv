@@ -1,0 +1,13 @@
+table,column,type,allowed,needed_for,description
+clinical,subject_id,id,,always,"Coded subject ID. Must match the T1 file or folder name. No names, dates or record numbers."
+clinical,do_present,binary,0 or 1,q3_detrusor_overactivity,"Detrusor overactivity on urodynamics: 1 present, 0 absent."
+clinical,nbss_total,number,0 to 74,"q4_symptom_severity, q5_treatment_response","Neurogenic Bladder Symptom Score, total, at baseline."
+clinical,diary_voids_per_day,number,>= 0,q4_symptom_severity,Bladder diary: mean voids per day at baseline.
+clinical,diary_urgency_per_day,number,>= 0,q4_symptom_severity,Bladder diary: mean urgency episodes per day at baseline.
+clinical,diary_incontinence_per_day,number,>= 0,q4_symptom_severity,Bladder diary: mean incontinence episodes per day at baseline.
+clinical,arm,choice,active | sham,q5_treatment_response,Treatment arm. Only read when q5 is on.
+clinical,nbss_total_post,number,0 to 74,q5_treatment_response,NBSS total right after treatment. Only read when q5 is on.
+fc,subject_id,id,,always,"Coded subject ID, as in the clinical table."
+fc,state,choice,full | empty | change,always,Bladder state of the scan. 'change' rows are optional: without them the pipeline computes full minus empty itself.
+fc,connection,text,,always,"Any label for the FC outcome, for example a pair of regions. The same label must be used for every subject and state."
+fc,fc_z,number,,always,"Functional connectivity value, Fisher z."

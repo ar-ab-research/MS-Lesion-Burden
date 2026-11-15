@@ -43,6 +43,14 @@ def build_parser() -> argparse.ArgumentParser:
     show = sub.add_parser("show-config", help="print the config with defaults filled in")
     _add_config(show)
 
+    fake = sub.add_parser("make-fake-data", help="write fake clinical and FC tables for testing")
+    _add_config(fake)
+    fake.add_argument("--n", type=int, default=24,
+                      help="number of subjects when the scans folder is empty (default: 24)")
+    fake.add_argument("--seed", type=int, default=0)
+    fake.add_argument("--force", action="store_true",
+                      help="overwrite the clinical and FC files named in the config")
+
     check = sub.add_parser("check-data", help="check that no data files are tracked by git")
     check.add_argument("--staged", action="store_true", help="check staged files only")
     return parser
@@ -74,6 +82,42 @@ def _show_config(args) -> int:
     return 0
 
 
+def _make_fake_data(args) -> int:
+    from mslb import fakedata, inputs
+
+    cfg = load(args.config)
+    targets = [cfg.paths.clinical_csv, cfg.paths.fc_csv]
+    existing = [str(p) for p in targets if p.exists()]
+    if existing and not args.force:
+        # the same paths hold the real tables on a real run, so never replace them quietly
+        print(f"error: not overwriting {', '.join(existing)}. pass --force if these are fake.",
+              file=sys.stderr)
+        return 2
+    ids = list(inputs.discover_t1(cfg.paths.t1_dir)) if cfg.paths.t1_dir.is_dir() else []
+    if ids:
+        print(f"subjects  {len(ids)} scans found in {cfg.paths.t1_dir}")
+    else:
+        ids = fakedata.default_ids(args.n)
+        print(f"subjects  {len(ids)} made-up IDs (no scans in {cfg.paths.t1_dir})")
+    burden = None
+    imaging = cfg.paths.local_dir / "imaging.csv"
+    if imaging.is_file():
+        import pandas as pd
+
+        table = pd.read_csv(imaging, dtype={"subject_id": str}).set_index("subject_id")
+        if set(ids) <= set(table.index) and "lesion_volume_ml" in table:
+            burden = table["lesion_volume_ml"].to_dict()
+            print(f"burden    planted effects follow lesion volume in {imaging}")
+    if burden is None:
+        print("burden    no imaging table yet, planted effects follow a random stand-in")
+    clinical, fc = fakedata.make_fake(ids, seed=args.seed, burden=burden)
+    for path, frame in zip(targets, (clinical, fc)):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        frame.to_csv(path, index=False, lineterminator="\n")
+        print(f"wrote     {path}  ({len(frame)} rows, FAKE)")
+    return 0
+
+
 def _check_data(args) -> int:
     return datasafety.run(staged=args.staged)
 
@@ -81,6 +125,7 @@ def _check_data(args) -> int:
 COMMANDS = {
     "run": _run,
     "show-config": _show_config,
+    "make-fake-data": _make_fake_data,
     "check-data": _check_data,
 }
 
