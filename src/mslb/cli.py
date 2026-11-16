@@ -58,6 +58,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="where the Open MS files go (default: data/openms next to the config)")
     openms.add_argument("--force", action="store_true", help="segment again even if cached")
 
+    fetch = sub.add_parser("fetch", help="download the atlas and template into the cache")
+    _add_config(fetch)
+
     check = sub.add_parser("check-data", help="check that no data files are tracked by git")
     check.add_argument("--staged", action="store_true", help="check staged files only")
     return parser
@@ -139,6 +142,15 @@ def _validate_openms(args) -> int:
     return 0
 
 
+def _fetch(args) -> int:
+    from mslb import atlas
+
+    cfg = load(args.config)
+    for name, path in atlas.fetch_all(cfg).items():
+        print(f"{name:14s} {path}")
+    return 0
+
+
 def _check_data(args) -> int:
     return datasafety.run(staged=args.staged)
 
@@ -148,6 +160,7 @@ COMMANDS = {
     "show-config": _show_config,
     "make-fake-data": _make_fake_data,
     "validate-openms": _validate_openms,
+    "fetch": _fetch,
     "check-data": _check_data,
 }
 
