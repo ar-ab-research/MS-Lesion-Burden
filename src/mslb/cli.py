@@ -80,8 +80,12 @@ def _run(args) -> int:
     if args.dry_run:
         print("dry run: config and inputs are fine")
         return 0
-    print("error: the stages are not wired up yet, only --dry-run works", file=sys.stderr)
-    return 3
+    from mslb import pipeline
+
+    manifest = pipeline.run(cfg, force=args.force)
+    print(f"done      {manifest['counts']['processed']} subjects in "
+          f"{manifest['seconds']['total']:.0f} s")
+    return 0
 
 
 def _show_config(args) -> int:
