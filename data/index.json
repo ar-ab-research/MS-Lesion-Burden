@@ -1,0 +1,86 @@
+{
+ "subjects": [
+  "patient01",
+  "patient07",
+  "patient12",
+  "patient19"
+ ],
+ "measurements": [
+  {
+   "id": "patient01",
+   "lesion_volume_ml": 38.5105,
+   "lesion_volume_norm_ml": 57.9271,
+   "lesion_count": 14,
+   "head_scale": 1.5042,
+   "tracts": {
+    "ATR": {
+     "ml": 1.3407,
+     "norm_ml": 2.0166,
+     "pct": 12.9427
+    },
+    "SLF": {
+     "ml": 0.3876,
+     "norm_ml": 0.583,
+     "pct": 4.4433
+    }
+   }
+  },
+  {
+   "id": "patient07",
+   "lesion_volume_ml": 2.2147,
+   "lesion_volume_norm_ml": 3.8597,
+   "lesion_count": 13,
+   "head_scale": 1.7428,
+   "tracts": {
+    "ATR": {
+     "ml": 0.1021,
+     "norm_ml": 0.178,
+     "pct": 1.0418
+    },
+    "SLF": {
+     "ml": 0.0359,
+     "norm_ml": 0.0625,
+     "pct": 0.3547
+    }
+   }
+  },
+  {
+   "id": "patient12",
+   "lesion_volume_ml": 59.2664,
+   "lesion_volume_norm_ml": 80.2053,
+   "lesion_count": 9,
+   "head_scale": 1.3533,
+   "tracts": {
+    "ATR": {
+     "ml": 1.5254,
+     "norm_ml": 2.0644,
+     "pct": 14.2515
+    },
+    "SLF": {
+     "ml": 4.8227,
+     "norm_ml": 6.5266,
+     "pct": 41.0362
+    }
+   }
+  },
+  {
+   "id": "patient19",
+   "lesion_volume_ml": 48.9437,
+   "lesion_volume_norm_ml": 87.1399,
+   "lesion_count": 5,
+   "head_scale": 1.7804,
+   "tracts": {
+    "ATR": {
+     "ml": 1.2542,
+     "norm_ml": 2.233,
+     "pct": 14.2603
+    },
+    "SLF": {
+     "ml": 3.034,
+     "norm_ml": 5.4017,
+     "pct": 41.2445
+    }
+   }
+  }
+ ]
+}

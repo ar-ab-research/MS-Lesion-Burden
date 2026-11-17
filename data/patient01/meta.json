@@ -1,0 +1,173 @@
+{
+ "id": "patient01",
+ "dims": [
+  154,
+  202,
+  146
+ ],
+ "voxel_mm": 1.0,
+ "orientation": "RAS",
+ "layers": {
+  "t1": "t1.u8.gz",
+  "lesion": "lesion.u8.gz",
+  "tracts": "tracts.u8.gz",
+  "reference": "reference.u8.gz"
+ },
+ "tracts": {
+  "1": "ATR",
+  "2": "SLF"
+ },
+ "intensity_window": [
+  1.0,
+  1246.0
+ ],
+ "lesions": [
+  {
+   "voxel": [
+    103,
+    97,
+    86
+   ],
+   "ml": 20.951
+  },
+  {
+   "voxel": [
+    56,
+    93,
+    82
+   ],
+   "ml": 18.754
+  },
+  {
+   "voxel": [
+    78,
+    89,
+    79
+   ],
+   "ml": 0.11
+  },
+  {
+   "voxel": [
+    78,
+    142,
+    73
+   ],
+   "ml": 0.051
+  },
+  {
+   "voxel": [
+    116,
+    102,
+    88
+   ],
+   "ml": 0.036
+  },
+  {
+   "voxel": [
+    58,
+    127,
+    103
+   ],
+   "ml": 0.034
+  },
+  {
+   "voxel": [
+    99,
+    96,
+    78
+   ],
+   "ml": 0.03
+  },
+  {
+   "voxel": [
+    65,
+    89,
+    112
+   ],
+   "ml": 0.029
+  },
+  {
+   "voxel": [
+    50,
+    108,
+    95
+   ],
+   "ml": 0.015
+  },
+  {
+   "voxel": [
+    54,
+    127,
+    84
+   ],
+   "ml": 0.004
+  },
+  {
+   "voxel": [
+    62,
+    100,
+    114
+   ],
+   "ml": 0.004
+  },
+  {
+   "voxel": [
+    47,
+    111,
+    83
+   ],
+   "ml": 0.003
+  },
+  {
+   "voxel": [
+    66,
+    126,
+    98
+   ],
+   "ml": 0.003
+  },
+  {
+   "voxel": [
+    117,
+    105,
+    84
+   ],
+   "ml": 0.003
+  },
+  {
+   "voxel": [
+    60,
+    127,
+    108
+   ],
+   "ml": 0.002
+  },
+  {
+   "voxel": [
+    64,
+    149,
+    86
+   ],
+   "ml": 0.002
+  }
+ ],
+ "stats": {
+  "lesion_volume_ml": 38.5105,
+  "lesion_volume_norm_ml": 57.9271,
+  "lesion_count": 14,
+  "head_scale": 1.5042,
+  "tracts": {
+   "ATR": {
+    "ml": 1.3407,
+    "norm_ml": 2.0166,
+    "pct": 12.9427
+   },
+   "SLF": {
+    "ml": 0.3876,
+    "norm_ml": 0.583,
+    "pct": 4.4433
+   }
+  }
+ },
+ "attribution": "Scan from the Open MS dataset (Lesjak et al. 2017), CC-BY. Lesion masks by MindGlide."
+}

@@ -1,0 +1,117 @@
+{
+ "id": "patient12",
+ "dims": [
+  154,
+  193,
+  173
+ ],
+ "voxel_mm": 1.0,
+ "orientation": "RAS",
+ "layers": {
+  "t1": "t1.u8.gz",
+  "lesion": "lesion.u8.gz",
+  "tracts": "tracts.u8.gz",
+  "reference": "reference.u8.gz"
+ },
+ "tracts": {
+  "1": "ATR",
+  "2": "SLF"
+ },
+ "intensity_window": [
+  1.0,
+  752.0
+ ],
+ "lesions": [
+  {
+   "voxel": [
+    51,
+    85,
+    101
+   ],
+   "ml": 31.198
+  },
+  {
+   "voxel": [
+    101,
+    83,
+    101
+   ],
+   "ml": 29.694
+  },
+  {
+   "voxel": [
+    75,
+    66,
+    97
+   ],
+   "ml": 0.288
+  },
+  {
+   "voxel": [
+    77,
+    131,
+    89
+   ],
+   "ml": 0.171
+  },
+  {
+   "voxel": [
+    64,
+    103,
+    133
+   ],
+   "ml": 0.138
+  },
+  {
+   "voxel": [
+    93,
+    140,
+    115
+   ],
+   "ml": 0.135
+  },
+  {
+   "voxel": [
+    65,
+    138,
+    117
+   ],
+   "ml": 0.083
+  },
+  {
+   "voxel": [
+    62,
+    143,
+    111
+   ],
+   "ml": 0.02
+  },
+  {
+   "voxel": [
+    46,
+    98,
+    68
+   ],
+   "ml": 0.003
+  }
+ ],
+ "stats": {
+  "lesion_volume_ml": 59.2664,
+  "lesion_volume_norm_ml": 80.2053,
+  "lesion_count": 9,
+  "head_scale": 1.3533,
+  "tracts": {
+   "ATR": {
+    "ml": 1.5254,
+    "norm_ml": 2.0644,
+    "pct": 14.2515
+   },
+   "SLF": {
+    "ml": 4.8227,
+    "norm_ml": 6.5266,
+    "pct": 41.0362
+   }
+  }
+ },
+ "attribution": "Scan from the Open MS dataset (Lesjak et al. 2017), CC-BY. Lesion masks by MindGlide."
+}

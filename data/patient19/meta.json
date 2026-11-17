@@ -1,0 +1,85 @@
+{
+ "id": "patient19",
+ "dims": [
+  154,
+  181,
+  150
+ ],
+ "voxel_mm": 1.0,
+ "orientation": "RAS",
+ "layers": {
+  "t1": "t1.u8.gz",
+  "lesion": "lesion.u8.gz",
+  "tracts": "tracts.u8.gz",
+  "reference": "reference.u8.gz"
+ },
+ "tracts": {
+  "1": "ATR",
+  "2": "SLF"
+ },
+ "intensity_window": [
+  1.0,
+  1029.0
+ ],
+ "lesions": [
+  {
+   "voxel": [
+    52,
+    84,
+    91
+   ],
+   "ml": 27.524
+  },
+  {
+   "voxel": [
+    101,
+    78,
+    89
+   ],
+   "ml": 22.639
+  },
+  {
+   "voxel": [
+    75,
+    71,
+    84
+   ],
+   "ml": 0.17
+  },
+  {
+   "voxel": [
+    77,
+    119,
+    95
+   ],
+   "ml": 0.032
+  },
+  {
+   "voxel": [
+    92,
+    97,
+    123
+   ],
+   "ml": 0.014
+  }
+ ],
+ "stats": {
+  "lesion_volume_ml": 48.9437,
+  "lesion_volume_norm_ml": 87.1399,
+  "lesion_count": 5,
+  "head_scale": 1.7804,
+  "tracts": {
+   "ATR": {
+    "ml": 1.2542,
+    "norm_ml": 2.233,
+    "pct": 14.2603
+   },
+   "SLF": {
+    "ml": 3.034,
+    "norm_ml": 5.4017,
+    "pct": 41.2445
+   }
+  }
+ },
+ "attribution": "Scan from the Open MS dataset (Lesjak et al. 2017), CC-BY. Lesion masks by MindGlide."
+}
