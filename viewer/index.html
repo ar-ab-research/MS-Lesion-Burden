@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>MS lesion viewer</title>
+    <meta name="description" content="T1-weighted brain MRI with multiple sclerosis lesions found by MindGlide, in three linked slice views." />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#stage">Skip to the images</a>
+    <div class="app is-starting" id="app">
+      <!-- left: what is drawn, and how -->
+      <aside class="panel panel--controls" id="controls" aria-label="Display controls">
+        <header class="brand">
+          <h1>MS lesion viewer</h1>
+          <p>T1-weighted MRI and the lesions MindGlide finds on it.</p>
+        </header>
+
+        <label class="field" for="scan">
+          <span class="field__name">Scan</span>
+          <select id="scan"></select>
+        </label>
+
+        <section class="group" aria-labelledby="overlays-title">
+          <h2 id="overlays-title">Overlays</h2>
+          <label class="check">
+            <input type="checkbox" id="show-lesion" checked />
+            <span class="swatch swatch--lesion" aria-hidden="true"></span>
+            <span class="check__text">Lesions <small>MindGlide, T1 only</small></span>
+          </label>
+          <label class="check" id="reference-row" hidden>
+            <input type="checkbox" id="show-reference" />
+            <span class="swatch swatch--reference" aria-hidden="true"></span>
+            <span class="check__text">Expert consensus <small>outline</small></span>
+          </label>
+          <label class="check" id="tracts-row" hidden>
+            <input type="checkbox" id="show-tracts" />
+            <span class="swatch swatch--tracts" aria-hidden="true"></span>
+            <span class="check__text" id="tracts-name">Tracts</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="show-cross" checked />
+            <span class="swatch swatch--cross" aria-hidden="true"></span>
+            <span class="check__text">Crosshair</span>
+          </label>
+        </section>
+
+        <section class="group" aria-labelledby="lesion-style-title">
+          <h2 id="lesion-style-title">Lesion drawing</h2>
+          <div class="seg" role="radiogroup" aria-labelledby="lesion-style-title">
+            <label><input type="radio" name="style" value="fill" checked /><span>Fill</span></label>
+            <label><input type="radio" name="style" value="outline" /><span>Outline</span></label>
+          </div>
+          <label class="field" for="opacity">
+            <span class="field__name">Opacity <output id="opacity-out" for="opacity">60%</output></span>
+            <input type="range" id="opacity" min="0" max="1" step="0.05" value="0.6" />
+          </label>
+        </section>
+
+        <section class="group" aria-labelledby="image-title">
+          <h2 id="image-title">Image</h2>
+          <label class="field" for="level">
+            <span class="field__name">Brightness <output id="level-out" for="level">50</output></span>
+            <input type="range" id="level" min="0" max="1" step="0.01" value="0.5" />
+          </label>
+          <label class="field" for="width">
+            <span class="field__name">Contrast <output id="width-out" for="width">50</output></span>
+            <input type="range" id="width" min="0" max="1" step="0.01" value="0.5" />
+          </label>
+          <button type="button" class="link" id="reset-image">Reset image</button>
+        </section>
+
+        <footer class="foot">
+          <details>
+            <summary>Mouse and keyboard</summary>
+            <ul>
+              <li>Click or drag in a view to move all three.</li>
+              <li>Scroll, or <kbd>↑</kbd> <kbd>↓</kbd>, steps through slices. <kbd>Page Up</kbd> and <kbd>Page Down</kbd> step ten.</li>
+              <li><kbd>Shift</kbd> and an arrow key moves the crosshair within the slice.</li>
+              <li><kbd>[</kbd> and <kbd>]</kbd> go to the previous and next lesion.</li>
+              <li><kbd>L</kbd> shows or hides lesions. <kbd>O</kbd> switches fill and outline.</li>
+            </ul>
+          </details>
+          <p id="attribution"></p>
+          <p>Research use only. Not a medical device, and not for diagnosis.</p>
+        </footer>
+      </aside>
+
+      <!-- centre: the images -->
+      <main class="stage" id="stage" tabindex="-1">
+        <canvas id="gl" aria-hidden="true"></canvas>
+
+        <button type="button" class="edge edge--left" id="toggle-controls" aria-controls="controls" aria-expanded="true">
+          <span class="edge__chev" aria-hidden="true"></span>
+          <span class="sr-only">Display controls</span>
+        </button>
+        <button type="button" class="edge edge--right" id="toggle-readout" aria-controls="readout-panel" aria-expanded="true">
+          <span class="edge__chev" aria-hidden="true"></span>
+          <span class="sr-only">Scan measurements</span>
+        </button>
+
+        <div class="pill pill--mode seg" role="radiogroup" aria-label="What to show">
+          <label><input type="radio" name="mode" value="scans" checked /><span>Scans</span></label>
+          <label><input type="radio" name="mode" value="results" /><span>Group results</span></label>
+        </div>
+
+        <div class="pill pill--views seg" role="radiogroup" aria-label="Which views to show">
+          <label><input type="radio" name="layout" value="all" checked /><span>Three views</span></label>
+          <label><input type="radio" name="layout" value="axial" /><span>Axial</span></label>
+          <label><input type="radio" name="layout" value="coronal" /><span>Coronal</span></label>
+          <label><input type="radio" name="layout" value="sagittal" /><span>Sagittal</span></label>
+        </div>
+
+        <div class="panes" id="panes" data-layout="all">
+          <section class="pane" data-view="axial" tabindex="0" aria-label="Axial view">
+            <header class="pane__tag"><h2>Axial</h2><span class="pane__slice"></span></header>
+            <div class="pane__marks" aria-hidden="true">
+              <span class="mark mark--left"></span><span class="mark mark--right"></span>
+              <span class="mark mark--top"></span><span class="mark mark--bottom"></span>
+              <span class="cross cross--h"></span><span class="cross cross--v"></span>
+            </div>
+          </section>
+          <section class="pane" data-view="coronal" tabindex="0" aria-label="Coronal view">
+            <header class="pane__tag"><h2>Coronal</h2><span class="pane__slice"></span></header>
+            <div class="pane__marks" aria-hidden="true">
+              <span class="mark mark--left"></span><span class="mark mark--right"></span>
+              <span class="mark mark--top"></span><span class="mark mark--bottom"></span>
+              <span class="cross cross--h"></span><span class="cross cross--v"></span>
+            </div>
+          </section>
+          <section class="pane" data-view="sagittal" tabindex="0" aria-label="Sagittal view">
+            <header class="pane__tag"><h2>Sagittal</h2><span class="pane__slice"></span></header>
+            <div class="pane__marks" aria-hidden="true">
+              <span class="mark mark--left"></span><span class="mark mark--right"></span>
+              <span class="mark mark--top"></span><span class="mark mark--bottom"></span>
+              <span class="cross cross--h"></span><span class="cross cross--v"></span>
+            </div>
+          </section>
+        </div>
+
+        <!-- the slice scrubber. its track is the lesion profile: how much lesion each slice holds -->
+        <div class="pill pill--scrub" id="scrub">
+          <button type="button" id="slice-back" aria-label="Previous slice">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+          </button>
+          <span class="scrub__end" id="scrub-low" aria-hidden="true"></span>
+          <div class="scrub__track" id="profile" role="slider" tabindex="0" aria-orientation="horizontal"
+               aria-label="Slice, drawn over the amount of lesion in each slice">
+            <canvas aria-hidden="true"></canvas>
+          </div>
+          <span class="scrub__end" id="scrub-high" aria-hidden="true"></span>
+          <button type="button" id="slice-forward" aria-label="Next slice">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+          </button>
+          <span class="scrub__where" id="scrub-where"></span>
+        </div>
+
+        <!-- every scan's measurements and the results for each question, as one page -->
+        <section class="report" id="report" aria-labelledby="report-title" hidden>
+          <div class="report__page">
+            <header class="report__head">
+              <div>
+                <h2 id="report-title">Group results</h2>
+                <p id="report-meta"></p>
+              </div>
+              <div class="report__actions">
+                <button type="button" class="btn" id="copy-scans">Copy the scan table</button>
+                <button type="button" class="btn" id="copy-summary">Copy the full summary</button>
+                <span class="copied" id="report-copied" role="status" aria-live="polite"></span>
+              </div>
+            </header>
+            <div id="report-body"></div>
+          </div>
+        </section>
+
+        <div class="notice" id="notice" role="status" hidden></div>
+      </main>
+
+      <!-- right: what was measured -->
+      <aside class="panel panel--readout" id="readout-panel" aria-label="Scan measurements">
+        <section class="hero" aria-labelledby="hero-title">
+          <h2 id="hero-title">Lesion volume</h2>
+          <p class="hero__value"><span id="hero-value">–</span><span class="hero__unit" id="hero-unit"></span></p>
+          <p class="hero__note" id="hero-note"></p>
+          <p class="hero__copy">
+            <button type="button" class="link" id="copy-scan">Copy this scan's measurements</button>
+            <span class="copied" id="scan-copied" role="status" aria-live="polite"></span>
+          </p>
+        </section>
+
+        <dl class="facts" id="facts"></dl>
+
+        <section class="group" aria-labelledby="tracts-title" id="tracts-group" hidden>
+          <h2 id="tracts-title">Lesion inside each tract</h2>
+          <ul class="meters" id="meters"></ul>
+        </section>
+
+        <section class="group" aria-labelledby="here-title">
+          <h2 id="here-title">At the crosshair</h2>
+          <dl class="facts facts--here" id="here"></dl>
+        </section>
+
+        <section class="group group--lesions" aria-labelledby="lesions-title">
+          <div class="group__row">
+            <h2 id="lesions-title">Lesions, largest first</h2>
+            <div class="stepper">
+              <button type="button" id="prev-lesion" aria-label="Previous lesion">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+              </button>
+              <button type="button" id="next-lesion" aria-label="Next lesion">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+              </button>
+            </div>
+          </div>
+          <ol class="lesions" id="lesions"></ol>
+        </section>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

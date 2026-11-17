@@ -1,0 +1,9 @@
+{
+  "note": "scans that may go on the public site. npm run deploy ships whatever is in public/data, so a scan only goes on this list once it is cleared for public release. patient scans never do.",
+  "subjects": {
+    "patient01": "Open MS dataset (Lesjak et al. 2017), CC-BY",
+    "patient07": "Open MS dataset (Lesjak et al. 2017), CC-BY",
+    "patient12": "Open MS dataset (Lesjak et al. 2017), CC-BY",
+    "patient19": "Open MS dataset (Lesjak et al. 2017), CC-BY"
+  }
+}

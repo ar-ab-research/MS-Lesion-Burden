@@ -39,6 +39,13 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--force", action="store_true", help="redo stages that already have output")
     run.add_argument("--dry-run", action="store_true",
                      help="check the config and inputs, list the stages, and stop")
+    run.add_argument("--view", action="store_true",
+                     help="open the results in the viewer when the run is done")
+
+    look = sub.add_parser("view", help="open the processed scans and the group results in the browser")
+    _add_config(look)
+    look.add_argument("--port", type=int, default=5280, help="port to serve on (default: 5280)")
+    look.add_argument("--no-browser", action="store_true", help="serve without opening a browser")
 
     show = sub.add_parser("show-config", help="print the config with defaults filled in")
     _add_config(show)
@@ -60,6 +67,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     fetch = sub.add_parser("fetch", help="download the atlas and template into the cache")
     _add_config(fetch)
+
+    export = sub.add_parser("export-viewer", help="write the viewer's files for chosen scans")
+    _add_config(export)
+    export.add_argument("--subjects", nargs="*", default=None,
+                        help="subject IDs to export (default: every processed subject)")
+    export.add_argument("--out", default=None,
+                        help="output folder (default: outputs/local/viewer). the public site is "
+                             "built from viewer/public/data")
+    export.add_argument("--attribution", default="",
+                        help="credit line shown in the viewer for these scans")
 
     check = sub.add_parser("check-data", help="check that no data files are tracked by git")
     check.add_argument("--staged", action="store_true", help="check staged files only")
@@ -85,6 +102,19 @@ def _run(args) -> int:
     manifest = pipeline.run(cfg, force=args.force)
     print(f"done      {manifest['counts']['processed']} subjects in "
           f"{manifest['seconds']['total']:.0f} s")
+    if args.view:
+        from mslb import view
+
+        view.view(cfg)
+    else:
+        print(f"next      mslb view -c {args.config}   to look at the scans and the results")
+    return 0
+
+
+def _view(args) -> int:
+    from mslb import view
+
+    view.view(load(args.config), port=args.port, open_browser=not args.no_browser)
     return 0
 
 
@@ -155,16 +185,31 @@ def _fetch(args) -> int:
     return 0
 
 
+def _export_viewer(args) -> int:
+    from pathlib import Path
+
+    from mslb import inputs, viewer_export
+
+    cfg = load(args.config)
+    out = Path(args.out) if args.out else viewer_export.default_out(cfg)
+    scans = inputs.discover_t1(cfg.paths.t1_dir)
+    ids = viewer_export.export(cfg, scans, out, args.subjects, args.attribution, force=True)
+    print(f"wrote     {out}  ({len(ids)} subjects listed)")
+    return 0
+
+
 def _check_data(args) -> int:
     return datasafety.run(staged=args.staged)
 
 
 COMMANDS = {
     "run": _run,
+    "view": _view,
     "show-config": _show_config,
     "make-fake-data": _make_fake_data,
     "validate-openms": _validate_openms,
     "fetch": _fetch,
+    "export-viewer": _export_viewer,
     "check-data": _check_data,
 }
 

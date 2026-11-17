@@ -1,0 +1,1262 @@
+/* three columns, like the TMS-Nav viewer this one sits beside: display controls, the
+   images, the measurements. the side panels run the full height and slide off their own
+   edge, so a small frame can give its whole width to the images.
+
+   the images sit on true black. the panels are a neutral charcoal, so nothing around a
+   slice tints how its greys read. colour is kept for the overlays, plus one quiet blue
+   for the controls. */
+
+:root {
+  --stage: #000000;
+  --panel: #17191e;
+  --raised: #20232a;
+  --raised-2: #2b2f38;
+  --line: #2a2e36;
+  --line-strong: #454b57;
+  --text: #eceef1;
+  --muted: #979eaa;
+  --accent: #7fb2f0;
+
+  --lesion: #ffb224;
+  --reference: #46d9e6;
+  --tract-1: #9aaeff;
+  --tract-2: #7bdcab;
+  --cross: #f4f5f7;
+
+  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-tight: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+
+  --controls-w: 264px;
+  --readout-w: 304px;
+  --slide: 0.22s cubic-bezier(0.2, 0, 0, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--stage);
+  color: var(--text);
+  font: 400 14px/1.5 var(--font);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+p,
+dl,
+dd,
+ol,
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* hidden means hidden, whatever display a class gives the element */
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 50;
+  padding: 8px 12px;
+  background: var(--raised);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+}
+
+.skip:focus {
+  top: 12px;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  height: 100dvh;
+}
+
+/* ---- side panels ------------------------------------------------------------- */
+
+.panel {
+  position: relative;
+  z-index: 20;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: var(--panel);
+  transition: margin var(--slide), transform var(--slide), visibility 0s linear 0s;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.panel--controls {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: var(--controls-w);
+  padding: 22px 18px 18px;
+  border-right: 1px solid var(--line);
+}
+
+.panel--readout {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: var(--readout-w);
+  padding: 22px 18px 18px;
+  border-left: 1px solid var(--line);
+}
+
+.app.controls-hidden .panel--controls {
+  margin-left: calc(-1 * var(--controls-w));
+}
+
+.app.readout-hidden .panel--readout {
+  margin-right: calc(-1 * var(--readout-w));
+}
+
+/* out of reach of the keyboard too, once the slide has finished */
+.app.controls-hidden .panel--controls,
+.app.readout-hidden .panel--readout {
+  visibility: hidden;
+  transition: margin var(--slide), transform var(--slide), visibility 0s linear 0.22s;
+}
+
+.brand h1 {
+  font: 600 18px/1.25 var(--font);
+  letter-spacing: -0.01em;
+}
+
+.brand p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.group {
+  display: grid;
+  gap: 10px;
+}
+
+.group h2,
+.hero h2 {
+  font: 500 12.5px/1.3 var(--font);
+  color: var(--muted);
+}
+
+.group__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field__name {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field__name output {
+  color: var(--text);
+}
+
+select {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 30px 0 12px;
+  background: var(--raised)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23979eaa' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E")
+    no-repeat right 9px center / 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+select:hover {
+  border-color: var(--line-strong);
+}
+
+/* an overlay's row carries the colour it is drawn in */
+.check {
+  display: grid;
+  grid-template-columns: 18px 12px 1fr;
+  align-items: center;
+  gap: 9px;
+  min-height: 28px;
+  cursor: pointer;
+}
+
+.check[hidden] {
+  display: none;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.check small {
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.swatch--lesion {
+  background: var(--lesion);
+}
+
+.swatch--reference {
+  border: 2px solid var(--reference);
+}
+
+.swatch--tracts {
+  background: linear-gradient(135deg, var(--tract-1) 50%, var(--tract-2) 50%);
+}
+
+.swatch--cross {
+  background:
+    linear-gradient(var(--cross), var(--cross)) center / 100% 2px no-repeat,
+    linear-gradient(var(--cross), var(--cross)) center / 2px 100% no-repeat;
+}
+
+/* a row of choices where one is on. used in the panel and for the floating view switch */
+.seg {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.seg label {
+  position: relative;
+  flex: 1;
+  cursor: pointer;
+}
+
+.seg input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.seg span {
+  display: block;
+  padding: 5px 14px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.seg label:hover span {
+  color: var(--text);
+}
+
+.seg input:checked + span {
+  background: var(--raised-2);
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 -0.5px var(--accent);
+}
+
+.seg input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.link {
+  justify-self: start;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+}
+
+.link:hover {
+  color: var(--text);
+}
+
+.foot {
+  display: grid;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.foot p:empty {
+  display: none;
+}
+
+.foot summary {
+  width: fit-content;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.foot ul {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+
+kbd {
+  padding: 0 5px;
+  background: var(--raised);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  font: 500 11px/1.6 var(--font);
+  color: var(--text);
+}
+
+/* ---- the measurements ---------------------------------------------------------- */
+
+.hero__value {
+  margin-top: 2px;
+  font: 600 44px/1.05 var(--font);
+  letter-spacing: -0.02em;
+}
+
+.hero__unit {
+  margin-left: 6px;
+  color: var(--muted);
+  font: 500 16px/1 var(--font);
+  letter-spacing: 0;
+}
+
+.hero__note {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.hero__note b {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+}
+
+.facts:empty {
+  display: none;
+}
+
+.facts dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.facts dd {
+  text-align: right;
+  font-weight: 500;
+}
+
+.facts--here dd {
+  font-weight: 400;
+}
+
+.tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.tag--lesion {
+  background: var(--lesion);
+  color: #1c1300;
+}
+
+.tag--plain {
+  border: 1px solid var(--line-strong);
+}
+
+.meters {
+  display: grid;
+  gap: 2px;
+}
+
+.meters li {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: baseline;
+  gap: 2px 9px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.meters li:last-child {
+  border-bottom: 0;
+}
+
+.meters .dot {
+  align-self: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.meters .name {
+  font-weight: 500;
+}
+
+.meters .value {
+  font-weight: 500;
+}
+
+.meters .share {
+  grid-column: 2 / -1;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stepper {
+  display: flex;
+  gap: 4px;
+}
+
+.stepper button,
+.pill--scrub button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.stepper button:hover,
+.pill--scrub button:hover {
+  background: var(--raised-2);
+  border-color: var(--line-strong);
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stepper svg,
+.pill--scrub svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* one row per lesion. the bar behind the number is its volume beside the largest */
+.lesions {
+  display: grid;
+  gap: 2px;
+}
+
+.lesions button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 30px;
+  padding: 0 10px 0 6px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  text-align: left;
+  transition: background-color 0.12s ease;
+}
+
+.lesions button:hover {
+  background: var(--raised);
+}
+
+.lesions .rank {
+  color: var(--muted);
+  font: 400 12px/1 var(--font-tight);
+  text-align: right;
+}
+
+.lesions .bar {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(var(--lesion), var(--lesion)) left / var(--share, 0%) 100% no-repeat, var(--line);
+}
+
+.lesions .ml {
+  font-size: 13px;
+}
+
+.lesions button[aria-current="true"] {
+  background: var(--raised-2);
+  box-shadow: inset 2px 0 0 var(--lesion);
+}
+
+.lesions__none {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---- the images ------------------------------------------------------------------ */
+
+.stage {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--stage);
+  isolation: isolate;
+}
+
+.stage:focus {
+  outline: none;
+}
+
+#gl {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* the views leave room above and below for the two floating pills */
+.panes {
+  position: absolute;
+  inset: 58px 22px 70px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.pane {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.pane:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.panes[data-layout="all"] .pane[data-view="axial"] {
+  grid-row: 1 / span 2;
+}
+
+.panes:not([data-layout="all"]) {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.panes:not([data-layout="all"]) .pane {
+  display: none;
+}
+
+.panes[data-layout="axial"] .pane[data-view="axial"],
+.panes[data-layout="coronal"] .pane[data-view="coronal"],
+.panes[data-layout="sagittal"] .pane[data-view="sagittal"] {
+  display: block;
+}
+
+.pane__tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 8px;
+  pointer-events: none;
+}
+
+.pane__tag h2 {
+  font: 500 13px/1.3 var(--font);
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
+
+/* the view the slice scrubber is driving */
+.pane.is-active .pane__tag h2 {
+  color: var(--text);
+}
+
+.pane.is-active .pane__tag h2::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 1px;
+}
+
+.pane__slice {
+  font: 400 12px/1.3 var(--font-tight);
+  color: var(--muted);
+}
+
+.pane__marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* which way is which, at the middle of each edge */
+.mark {
+  position: absolute;
+  z-index: 1;
+  font: 500 12px/1 var(--font-tight);
+  color: var(--muted);
+  text-shadow: 0 0 3px #000, 0 0 6px #000;
+}
+
+.mark--left {
+  left: 6px;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.mark--right {
+  right: 6px;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.mark--top {
+  top: 28px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.mark--bottom {
+  bottom: 6px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+/* the two lines stop short of where they meet, so the point being looked at stays uncovered */
+.cross {
+  --gap: 9px;
+  position: absolute;
+  background: var(--cross);
+  opacity: 0.45;
+}
+
+.cross--h {
+  left: 0;
+  width: 100%;
+  height: 1px;
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(var(--cx) - var(--gap)),
+    transparent calc(var(--cx) - var(--gap)),
+    transparent calc(var(--cx) + var(--gap)),
+    #000 calc(var(--cx) + var(--gap))
+  );
+}
+
+.cross--v {
+  top: 0;
+  width: 1px;
+  height: 100%;
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(var(--cy) - var(--gap)),
+    transparent calc(var(--cy) - var(--gap)),
+    transparent calc(var(--cy) + var(--gap)),
+    #000 calc(var(--cy) + var(--gap))
+  );
+}
+
+.panes.no-cross .cross {
+  display: none;
+}
+
+/* ---- floating controls over the images --------------------------------------------- */
+
+.pill {
+  position: absolute;
+  left: 50%;
+  z-index: 10;
+  translate: -50% 0;
+  background: rgb(23 25 30 / 0.86);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+}
+
+.pill--views {
+  top: 12px;
+}
+
+/* scans or group results, in the corner where the page starts */
+.pill--mode {
+  top: 12px;
+  left: 34px;
+  translate: none;
+}
+
+/* with the results up, the image controls have nothing to act on */
+.app.is-results .pill--views,
+.app.is-results .pill--scrub,
+.app.is-results .panes,
+.app.is-results #gl {
+  visibility: hidden;
+}
+
+.pill--scrub {
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(560px, calc(100% - 72px));
+  padding: 5px 14px 5px 6px;
+}
+
+.scrub__end {
+  width: 10px;
+  color: var(--muted);
+  font: 500 12px/1 var(--font-tight);
+  text-align: center;
+}
+
+.scrub__track {
+  position: relative;
+  flex: 1;
+  height: 34px;
+  min-width: 0;
+  border-radius: 6px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.scrub__track canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.scrub__where {
+  min-width: 62px;
+  color: var(--muted);
+  font: 400 12px/1.2 var(--font-tight);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.scrub__where b {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* the tab that hides a panel, half way down the edge it belongs to. the chevron points
+   the way the panel will move */
+.edge {
+  position: absolute;
+  top: 50%;
+  z-index: 15;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 56px;
+  margin-top: -28px;
+  padding: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.edge:hover {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.edge--left {
+  left: 0;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.edge--right {
+  right: 0;
+  border-right: 0;
+  border-radius: 8px 0 0 8px;
+}
+
+.edge__chev {
+  width: 0;
+  height: 0;
+  border-right: 5px solid currentColor;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  transition: transform 0.22s ease;
+}
+
+.edge--right .edge__chev,
+.app.controls-hidden .edge--left .edge__chev {
+  transform: rotate(180deg);
+}
+
+.app.readout-hidden .edge--right .edge__chev {
+  transform: none;
+}
+
+/* ---- group results: one readable page over the stage -------------------------------- */
+
+.report {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  overflow-y: auto;
+  padding: 64px 34px 48px;
+  background: var(--panel);
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.report__page {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.report__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.report__head h2 {
+  font: 600 26px/1.2 var(--font);
+  letter-spacing: -0.015em;
+}
+
+.report__head p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.report__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  min-height: 32px;
+  padding: 0 14px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--raised-2);
+  border-color: var(--line-strong);
+}
+
+.copied {
+  min-width: 48px;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.report section {
+  margin-top: 34px;
+}
+
+.report h3 {
+  font: 600 17px/1.3 var(--font);
+  letter-spacing: -0.005em;
+}
+
+.report h4 {
+  margin: 18px 0 0;
+  font: 500 13px/1.3 var(--font);
+  color: var(--muted);
+}
+
+.report .note {
+  max-width: 72ch;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.report code {
+  padding: 1px 6px;
+  background: var(--raised);
+  border-radius: 4px;
+  font-size: 12.5px;
+}
+
+.banner {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--lesion);
+  background: rgb(255 178 36 / 0.09);
+  border-radius: 0 8px 8px 0;
+}
+
+.banner b {
+  color: var(--lesion);
+}
+
+.tablewrap {
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.report table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.report th {
+  padding: 0 14px 8px 0;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: left;
+  vertical-align: bottom;
+}
+
+.report td {
+  padding: 8px 14px 8px 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: baseline;
+}
+
+.report tbody tr:hover td {
+  background: rgb(255 255 255 / 0.025);
+}
+
+.report th.n,
+.report td.n {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.report th:last-child,
+.report td:last-child {
+  padding-right: 0;
+}
+
+.report .ci {
+  color: var(--muted);
+}
+
+.report .open {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgb(127 178 240 / 0.4);
+  text-underline-offset: 3px;
+}
+
+.report .open:hover {
+  text-decoration-color: var(--accent);
+}
+
+.hero__copy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.notice {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: rgb(0 0 0 / 0.7);
+  text-align: center;
+}
+
+.notice[hidden] {
+  display: none;
+}
+
+.notice p {
+  max-width: 44ch;
+}
+
+.notice code {
+  padding: 1px 6px;
+  background: var(--raised);
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.notice button {
+  padding: 7px 18px;
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  color: #0b1522;
+  font-weight: 500;
+}
+
+/* ---- narrow screens: the panels become drawers over the images ----------------------- */
+
+@media (max-width: 900px) {
+  body {
+    font-size: 16px;
+  }
+
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stage {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 30;
+    width: min(86vw, 320px);
+    box-shadow: 0 0 40px rgb(0 0 0 / 0.6);
+  }
+
+  .panel--controls {
+    left: 0;
+  }
+
+  .panel--readout {
+    right: 0;
+  }
+
+  .app.controls-hidden .panel--controls {
+    margin-left: 0;
+    transform: translateX(-100%);
+  }
+
+  .app.readout-hidden .panel--readout {
+    margin-right: 0;
+    transform: translateX(100%);
+  }
+
+    /* nothing slides or flashes into view while the page is still setting itself up */
+  .app.is-starting .panel {
+    visibility: hidden;
+    transition: none;
+  }
+
+  /* an open drawer carries its own tab on its inner edge, so it can always be closed */
+  .app:not(.controls-hidden) .edge--left {
+    left: min(86vw, 320px);
+    z-index: 31;
+  }
+
+  .app:not(.readout-hidden) .edge--right {
+    right: min(86vw, 320px);
+    z-index: 31;
+  }
+
+  .edge {
+    width: 24px;
+    height: 64px;
+    margin-top: -32px;
+  }
+
+  /* with one drawer out, the other side's tab would sit right beside this one */
+  .app:not(.readout-hidden) .edge--left,
+  .app:not(.controls-hidden) .edge--right {
+    display: none;
+  }
+
+  .panes {
+    inset: 56px 8px 68px;
+    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 3fr) minmax(0, 2fr);
+  }
+
+  .panes[data-layout="all"] .pane[data-view="axial"] {
+    grid-column: 1 / span 2;
+    grid-row: 1;
+  }
+
+  .seg span {
+    padding: 8px 11px;
+  }
+
+  /* two rows of pills: what to show, then which views */
+  .pill--mode {
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  .pill--views {
+    top: 62px;
+    max-width: calc(100% - 16px);
+  }
+
+  .panes {
+    inset: 112px 8px 68px;
+  }
+
+  .report {
+    padding: 64px 14px 40px;
+  }
+
+  .report__head h2 {
+    font-size: 22px;
+  }
+
+  .btn {
+    min-height: 44px;
+  }
+
+  .pill--scrub {
+    width: calc(100% - 16px);
+  }
+
+  .pill--scrub button,
+  .stepper button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .check {
+    min-height: 44px;
+  }
+
+  .lesions button {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
